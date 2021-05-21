@@ -39,12 +39,12 @@ func GenVideoFetcher(video *model.Video) FetchFun {
 
 		resp, err := client.Do(request)
 		if err != nil {
-			log.Fatalf("Fail to download the video %d,err is %s", video.ParCid.Cid, err)
+			log.Fatalf("Fail to download the video %s,err is %s", video.ParCid.Part, err)
 			return nil, err
 		}
 
 		if resp.StatusCode != http.StatusPartialContent {
-			log.Fatalf("Fail to download the video %d,status code is %d", video.ParCid.Cid, resp.StatusCode)
+			log.Fatalf("Fail to download the video %s,status code is %d", video.ParCid.Part, resp.StatusCode)
 			return nil, fmt.Errorf("wrong status code: %d", resp.StatusCode)
 		}
 		defer resp.Body.Close()
@@ -61,7 +61,7 @@ func GenVideoFetcher(video *model.Video) FetchFun {
 		log.Println(video.ParCid.ParAid.Title + ":" + filename + " is downloading.")
 		_, err = io.Copy(file, resp.Body)
 		if err != nil {
-			log.Printf("Failed to download video %d", video.ParCid.Cid)
+			log.Printf("Failed to download video %s", video.ParCid.Part)
 			return nil, err
 		}
 		log.Println(video.ParCid.ParAid.Title + ":" + filename + " has finished.")
