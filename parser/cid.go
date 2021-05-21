@@ -3,6 +3,9 @@ package parser
 import (
 	"crypto/md5"
 	"fmt"
+	"io"
+	"log"
+	"net/http"
 	"simple-golang-crawler/engine"
 	"simple-golang-crawler/fetcher"
 	"simple-golang-crawler/model"
@@ -27,7 +30,8 @@ func GenGetAidChildrenParseFun(videoAid *model.VideoAid) engine.ParseFunc {
 		for _, i := range data {
 			cid := i.Get("cid").Int()
 			page := i.Get("page").Int()
-			videoCid := model.NewVideoCidInfo(cid, videoAid, page)
+			part := i.Get("part").String()
+			videoCid := model.NewVideoCidInfo(cid, videoAid, page, part)
 			videoTotalPage += 1
 			cidStr := strconv.FormatInt(videoCid.Cid, 10)
 
@@ -48,8 +52,39 @@ func GenGetAidChildrenParseFun(videoAid *model.VideoAid) engine.ParseFunc {
 
 func GetRequestByAid(aid int64) *engine.Request {
 	reqUrl := fmt.Sprintf(_getCidUrlTemp, aid)
-	videoAid := model.NewVideoAidInfo(aid, fmt.Sprintf("%d", aid))
+	title := getTitle(aid)
+	videoAid := model.NewVideoAidInfo(aid, title)
 	reqParseFunction := GenGetAidChildrenParseFun(videoAid)
 	req := engine.NewRequest(reqUrl, reqParseFunction, fetcher.DefaultFetcher)
 	return req
+}
+
+func getTitle(aid int64) string {
+	resp, err := http.Get(fmt.Sprintf("https://api.bilibili.com/x/web-interface/view?aid=%d", aid))
+	if err != nil {
+		log.Fatalf("http.Get() function error：%v\n", err)
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("io.RedAll() function error：%v\n", err)
+	}
+	data := gjson.GetBytes(body, "data")
+	title := data.Get("title").String()
+	return title
+}
+
+func GetRequestByBvid(bvid string) *engine.Request {
+	resp, err := http.Get(fmt.Sprintf("http://api.bilibili.com/x/web-interface/archive/stat?bvid=%s", bvid))
+	if err != nil {
+		log.Fatalf("http.Get() function error：%v\n", err)
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("io.RedAll() function error：%v\n", err)
+	}
+	data := gjson.GetBytes(body, "data")
+	aid := data.Get("aid").Int()
+	return GetRequestByAid(aid)
 }

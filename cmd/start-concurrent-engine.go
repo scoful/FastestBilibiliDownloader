@@ -8,6 +8,7 @@ import (
 	"simple-golang-crawler/parser"
 	"simple-golang-crawler/persist"
 	"simple-golang-crawler/scheduler"
+	"strconv"
 	"sync"
 )
 
@@ -22,17 +23,21 @@ func main() {
 	}
 
 	var idType string
-	var id int64
+	var id string
 	var req *engine.Request
-	fmt.Println("Please enter your id type(`aid` or `upid`)")
+	fmt.Println("Please enter your id type(`aid` or `upid` or `bvid`)")
 	fmt.Scan(&idType)
 	fmt.Println("Please enter your id")
 	fmt.Scan(&id)
 
 	if idType == "aid" {
-		req = parser.GetRequestByAid(id)
+		intId, _ := strconv.ParseInt(id, 10, 64)
+		req = parser.GetRequestByAid(intId)
 	} else if idType == "upid" {
-		req = parser.GetRequestByUpId(id)
+		intId, _ := strconv.ParseInt(id, 10, 64)
+		req = parser.GetRequestByUpId(intId)
+	} else if idType == "bvid" {
+		req = parser.GetRequestByBvid(id)
 	} else {
 		log.Fatalln("Wrong type you enter")
 		os.Exit(1)
