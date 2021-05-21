@@ -11,7 +11,7 @@
 4. 提供了打包exe，在Windows环境直接运行就可
 
 ## 使用方法
-1. 下载最新版本
+1. 下载[最新版本](https://github.com/scoful/FastestBilibiliDownloader/releases)
 2. 选择一种方式来下载，手动输入，aid 或 upid 或 bvid
 -   aid是老版的b站视频id，是一串数字，现在基本是找不到类似的，eg: 801638963
 -   upid是指up主id，是一串数字，点up主头像进去，地址上可以看到，eg：110930331
